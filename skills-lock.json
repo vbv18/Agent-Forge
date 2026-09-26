@@ -12,6 +12,12 @@
       "sourceType": "github",
       "skillPath": "skills/firebase-basics/SKILL.md",
       "computedHash": "c0e06c4f5be407fcf74c9b76c91a4f87cac653a07c639904f82424fc4dbbe864"
+    },
+    "godaudits": {
+      "source": "hannsxpeter/godaudits",
+      "sourceType": "github",
+      "skillPath": "skills/godaudits/SKILL.md",
+      "computedHash": "b4a856fdb11f32adae09a3ef017611dbce240f30286fb8fe59e1ee2d31ed562e"
     }
   }
 }
