@@ -6,6 +6,7 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: "agentforge-92fdc.firebaseapp.com",
     projectId: "agentforge-92fdc",
     storageBucket: "agentforge-92fdc.firebasestorage.app",
