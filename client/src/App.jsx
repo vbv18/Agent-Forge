@@ -4,9 +4,7 @@ import getCurrentUser from "./features/getCurrentUser";
 import { useDispatch } from "react-redux";
 import { setUserData } from "./redux/userSlice";
 
-
 export default function App() {
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -18,7 +16,5 @@ export default function App() {
     getUser();
   }, []);
 
-  return (
-    <Home />
-  )
+  return <Home />;
 }
