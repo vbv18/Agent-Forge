@@ -1,4 +1,5 @@
 import redis from "../../../../shared/redis/redis.js";
+import { SESSION_TTL } from "../../../lib/constant.js";
 
 
 export async function setSession(userId, sessionId, { name, email, avatar }) {
@@ -8,7 +9,7 @@ export async function setSession(userId, sessionId, { name, email, avatar }) {
             name,
             email,
             avatar
-        }), "EX", 7 * 24 * 60 * 60);
+        }), "EX", SESSION_TTL);
 
     } catch (error) {
         console.error("[setSession]", error);

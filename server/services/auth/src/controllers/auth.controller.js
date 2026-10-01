@@ -3,7 +3,7 @@ import { getAuth } from "firebase-admin/auth";
 import { app } from "../config/firebase.js"
 import { findOneUser, createUser } from "../repositories/user.repositories.js";
 import { deleteSession, setSession } from "../repositories/session.repositories.js";
-import { SESSION_TTL, COOKIE_OPTIONS } from "../lib/constant.js";
+import { SESSION_TTL, COOKIE_OPTIONS } from "../../../lib/constant.js";
 
 
 export async function login(req, res) {
