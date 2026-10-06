@@ -25,12 +25,6 @@
       "skillPath": "skills/godaudits/SKILL.md",
       "computedHash": "b4a856fdb11f32adae09a3ef017611dbce240f30286fb8fe59e1ee2d31ed562e"
     },
-    "openai-docs": {
-      "source": "openai/skills",
-      "sourceType": "github",
-      "skillPath": "skills/.curated/openai-docs/SKILL.md",
-      "computedHash": "80d1836b9c7cdee24521c47e33a77cbf02b34783267f5a7e32c41557170fa6dd"
-    },
     "redux-toolkit": {
       "source": "mindrally/skills",
       "sourceType": "github",

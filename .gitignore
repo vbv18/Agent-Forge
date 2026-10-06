@@ -14,6 +14,8 @@ lerna-debug.log*
 dist
 dist-ssr
 *.local
+.agents/
+.godaudits/
 
 # Editor directories and files
 .vscode/*
