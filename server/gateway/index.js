@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 
 import authMiddleware from "./src/middleware/auth.middleware.js";
 import { getCurrentUser } from "./src/controllers/user.controller.js";
+import proxyWithHeader from "./src/utils/proxyWithHeader.js";
 
 const app = express();
 
@@ -22,7 +23,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/v1/auth", proxy(process.env.AUTH_SERVICE_URL));
-app.get("/api/v1/me", authMiddleware, getCurrentUser);
+app.use(authMiddleware);
+app.use("/api/v1/chat", proxyWithHeader(process.env.CHAT_SERVICE_URL));
+app.use("/api/v1/agent", proxyWithHeader(process.env.AGENT_SERVICE_URL));
+app.get("/api/v1/me", getCurrentUser);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server Gateway is running on port ${process.env.PORT}`);
