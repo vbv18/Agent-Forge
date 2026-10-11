@@ -1,268 +1,406 @@
-import { Coins, LogOut, MessageSquare, PanelLeftIcon, PenSquare, Plus, User } from "lucide-react";
-import { useEffect } from "react";
-import { useState } from "react";
+import {
+  Coins,
+  Loader2,
+  LogOut,
+  MessageSquare,
+  PanelLeft,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Plus,
+  User,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import getConversations from "../features/getConversations.js";
 import createConversation from "../features/createConversation.js";
-import { useDispatch, useSelector } from "react-redux";
-import {
-    addConversation,
-    setConversations,
-    setSelectedConversation,
-} from "../redux/conversationSlice.js";
 import logout from "../features/logout.js";
+import {
+  addConversation,
+  setConversations,
+  setSelectedConversation,
+} from "../redux/conversationSlice.js";
 import { setUserData } from "../redux/userSlice.js";
 
 export default function SideBar() {
-    const [isCollapsed, setCollapsed] = useState(false);
-    const dispatch = useDispatch();
-    const { conversations, selectedConversation } = useSelector(
-        (state) => state.conversation,
-    );
-    const { userData } = useSelector(
-        (state) => state.user,
-    );
-    const [imageError, setImageError] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
 
-    useEffect(() => {
-        setImageError(false);
-    }, [userData?.avatar]);
+  const dispatch = useDispatch();
+  const { conversations, selectedConversation } = useSelector(
+    (state) => state.conversation,
+  );
+  const { userData } = useSelector((state) => state.user);
 
-    useEffect(() => {
-        async function getConv() {
-            const data = await getConversations();
-            dispatch(setConversations(data));
+  const safeConversations = Array.isArray(conversations)
+    ? conversations.filter(Boolean)
+    : [];
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchConversations() {
+      try {
+        const data = await getConversations();
+        if (isMounted && data) {
+          dispatch(setConversations(Array.isArray(data) ? data : []));
         }
-        getConv();
-    }, [dispatch]);
+      } catch {
+        if (isMounted) {
+          dispatch(setConversations([]));
+        }
+      }
+    }
+    fetchConversations();
+    return () => {
+      isMounted = false;
+    };
+  }, [dispatch]);
 
-    async function handleCreateConversation() {
-        const data = await createConversation();
+  async function handleCreateConversation() {
+    if (isCreating) return;
+    setIsCreating(true);
+    try {
+      const data = await createConversation();
+      if (data && data._id) {
         dispatch(addConversation(data));
         dispatch(setSelectedConversation(data));
+        setIsMobileOpen(false);
+      }
+    } catch {
+      // Creation error handled gracefully
+    } finally {
+      setIsCreating(false);
     }
+  }
 
-    async function handleSelectedConversation(conv) {
-        dispatch(setSelectedConversation(conv));
+  function handleSelectConversation(conv) {
+    if (!conv) return;
+    dispatch(setSelectedConversation(conv));
+    setIsMobileOpen(false);
+  }
+
+  async function handleLogOut() {
+    try {
+      await logout();
+    } catch {
+      // Fail gracefully on logout
+    } finally {
+      dispatch(setUserData(null));
     }
+  }
 
-    async function handleLogOut() {
-        try {
-            await logout();
-        } catch (error) {
-            alert("Logout Failed! Try again after some time.");
-            return;
-        }
-        dispatch(setUserData(null));
-    }
+  const showAvatar =
+    Boolean(userData?.avatar) && failedAvatarUrl !== userData?.avatar;
 
-    if (isCollapsed) {
-        return (
-            <div className="hidden lg:flex flex-col items-center w-[56px] h-screen bg-[#0d0f14] border-r border-white/[0.06] py-4 gap-1 shrink-0">
-                <button
-                    className="flex items-center justify-center w-9 h-9 rounded-xl text-slate-500 hover:text-slate-200 hover:bg-white/[0.05] transition-colors duration-150 bg-transparent border-none cursor-pointer mb-1"
-                    onClick={() => setCollapsed(false)}
-                >
-                    <PanelLeftIcon />
-                </button>
-
-                <button
-                    className="flex items-center justify-center w-9 h-9 rounded-xl text-slate-500 hover:text-slate-200 hover:bg-white/[0.05] transition-colors duration-150 bg-transparent border-none cursor-pointer"
-                    onClick={handleCreateConversation}
-                >
-                    <Plus />
-                </button>
-
-                <div className="flex-1 overflow-y-auto px-2.5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pt-10">
-                    {conversations.map((conv, i) => {
-                        const isActive = selectedConversation?._id === conv?._id;
-                        return (
-                            <div
-                                key={conv._id}
-                                onClick={() => handleSelectedConversation(conv)}
-                                className={`flex items-center gap-2.5 cursor-pointer mb-0.5 px-3 py-2.5 rounded-[10px] border transition-colors duration-150
-                                    ${isActive
-                                        ? "bg-indigo-500/10 border-indigo-500/20"
-                                        : "bg-transparent border-transparent hover:bg-white/[0.04]"
-                                    }`}
-                            >
-                                <div
-                                    className={`flex items-center justify-center shrink-0 w-[20px] h-[20px] rounded-lg transition-colors duration-150
-                        ${isActive
-                                            ? "bg-indigo-500/15 text-indigo-400"
-                                            : "bg-white/[0.05] text-slate-500"
-                                        }`}
-                                >
-                                    <MessageSquare size={13} title={conv.title} />
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                <div className="relative shrink-0">
-                    {(userData?.avatar && !imageError) ? (
-                        <img
-                            src={userData.avatar}
-                            alt={userData.name || "User"}
-                            referrerPolicy="no-referrer"
-                            onError={() => setImageError(true)}
-                            className="w-9 h-9 rounded-[10px] object-cover border-2 border-indigo-500/25"
-                        />
-                    ) : (
-                        <div className="w-9 h-9 rounded-[10px] bg-white/[0.06] flex items-center justify-center">
-                            <User size={15} className="text-slate-400" />
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    }
-
-    return (
+  return (
+    <>
+      {/* Mobile backdrop overlay */}
+      {isMobileOpen && (
         <div
-            className={`fixed lg:static inset-y-0 left-0 z-50 ${isCollapsed ? "w-[70px]" : "w-[270px]"
-                } h-screen shrink-0 bg-[#0d0f14] border-r border-white/[0.06] transition-all duration-200`}
+          className="fixed inset-0 bg-black/65 backdrop-blur-xs z-40 lg:hidden transition-opacity"
+          onClick={() => setIsMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile floating toggle trigger when sidebar is closed */}
+      {!isMobileOpen && (
+        <button
+          type="button"
+          onClick={() => setIsMobileOpen(true)}
+          aria-label="Open sidebar"
+          className="fixed top-3 left-3 z-30 lg:hidden p-2 rounded-xl bg-[#12141c] text-slate-400 hover:text-slate-100 border border-white/[0.08] shadow-lg shadow-black/40 transition-colors"
         >
-            <div className="flex flex-col h-full">
-                {/* Header */}
-                <div className="flex items-center gap-2.5 px-4 py-4 border-b border-white/[0.06]">
-                    <button
-                        onClick={() => setCollapsed(!isCollapsed)}
-                        className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.05] transition-colors duration-150 bg-transparent border-none cursor-pointer shrink-0"
-                    >
-                        <PanelLeftIcon size={17} />
-                    </button>
+          <PanelLeft size={18} />
+        </button>
+      )}
 
-                    {!isCollapsed && (
-                        <>
-                            <span className="text-[16px] font-semibold text-slate-100 tracking-tight flex-1">
-                                AgentForge
-                            </span>
-
-                            <span className="text-[10px] font-medium text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full tracking-wide">
-                                free
-                            </span>
-
-                            <button
-                                className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.05] transition-colors duration-150 bg-transparent border-none cursor-pointer"
-                                title="New chat"
-                                onClick={handleCreateConversation}
-                            >
-                                <PenSquare size={14} />
-                            </button>
-                        </>
-                    )}
+      {/* Main Sidebar */}
+      <aside
+        aria-label="Sidebar navigation"
+        className={`fixed lg:static inset-y-0 left-0 z-50 h-screen shrink-0 bg-[#0c0d12] border-r border-white/[0.07] flex flex-col justify-between transition-all duration-200 ease-in-out select-none
+                    ${isMobileOpen ? "translate-x-0 w-[270px]" : "-translate-x-full lg:translate-x-0"}
+                    ${isCollapsed ? "lg:w-[68px]" : "lg:w-[260px]"}
+                `}
+      >
+        {/* Header Section */}
+        <div className="flex flex-col shrink-0">
+          <div className="h-14 px-3.5 flex items-center justify-between border-b border-white/[0.06]">
+            {isCollapsed ? (
+              <button
+                type="button"
+                onClick={() => setIsCollapsed(false)}
+                title="Expand sidebar"
+                aria-label="Expand sidebar"
+                className="hidden lg:flex w-10 h-10 mx-auto items-center justify-center rounded-xl text-slate-400 hover:text-slate-100 hover:bg-white/[0.05] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500/50"
+              >
+                <PanelLeftOpen size={18} />
+              </button>
+            ) : (
+              <>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-linear-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold shadow-xs shadow-indigo-500/30 shrink-0">
+                    AF
+                  </div>
+                  <span className="text-[14.5px] font-semibold text-slate-100 tracking-tight truncate">
+                    AgentForge
+                  </span>
+                  <span className="text-[10px] font-medium text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded-md shrink-0">
+                    {userData?.plan || "free"}
+                  </span>
                 </div>
 
-                {/* New Chat */}
-                <div className="px-4 pt-4 pb-1">
-                    <button
-                        title="New Chat"
-                        onClick={handleCreateConversation}
-                        className={`flex items-center justify-center gap-2 text-sm font-medium text-white bg-linear-to-br from-indigo-500 to-violet-700 hover:from-indigo-600 hover:to-violet-800 rounded-xl py-[10px] border-none cursor-pointer transition-opacity duration-150 ${isCollapsed ? "w-full" : "w-full"
-                            }`}
-                    >
-                        <Plus size={15} />
-                        {!isCollapsed && "New Chat"}
-                    </button>
-                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  {/* Desktop collapse button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsCollapsed(true)}
+                    title="Collapse sidebar"
+                    aria-label="Collapse sidebar"
+                    className="hidden lg:flex w-7 h-7 items-center justify-center rounded-lg text-slate-400 hover:text-slate-100 hover:bg-white/[0.05] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500/50"
+                  >
+                    <PanelLeftClose size={17} />
+                  </button>
 
-                {/* Conversations */}
-                {conversations.length == 0 ? (
-                    <div className="px-5 pt-4 pb-1.5 text-[10.5px] font-semibold uppercase tracking-widest text-slate-600">
-                        No recent conversations
-                    </div>
+                  {/* Mobile close button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileOpen(false)}
+                    title="Close sidebar"
+                    aria-label="Close sidebar"
+                    className="flex lg:hidden w-7 h-7 items-center justify-center rounded-lg text-slate-400 hover:text-slate-100 hover:bg-white/[0.05] transition-colors"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* New Chat Action */}
+          <div className="p-3">
+            {isCollapsed ? (
+              <button
+                type="button"
+                onClick={handleCreateConversation}
+                disabled={isCreating}
+                title="New chat"
+                aria-label="New chat"
+                className="w-10 h-10 mx-auto flex items-center justify-center rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 hover:border-indigo-500/40 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500/50 disabled:opacity-50"
+              >
+                {isCreating ? (
+                  <Loader2 size={16} className="animate-spin text-indigo-400" />
                 ) : (
-                    <div className="px-5 pt-4 pb-1.5 text-[10.5px] font-semibold uppercase tracking-widest text-slate-600">
-                        Recents
-                    </div>
+                  <Plus size={18} />
                 )}
-
-                <div className="flex-1 overflow-y-auto px-2.5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    {conversations.map((conv, i) => {
-                        const isActive = selectedConversation?._id === conv?._id;
-                        return (
-                            <div
-                                key={conv._id}
-                                onClick={() => handleSelectedConversation(conv)}
-                                className={`flex items-center gap-2.5 cursor-pointer mb-0.5 px-3 py-2.5 rounded-[10px] border transition-colors duration-150
-                                    ${isActive
-                                        ? "bg-indigo-500/10 border-indigo-500/20"
-                                        : "bg-transparent border-transparent hover:bg-white/[0.04]"
-                                    }`}
-                            >
-                                <div
-                                    className={`flex items-center justify-center shrink-0 w-[28px] h-[28px] rounded-lg transition-colors duration-150
-                        ${isActive
-                                            ? "bg-indigo-500/15 text-indigo-400"
-                                            : "bg-white/[0.05] text-slate-500"
-                                        }`}
-                                >
-                                    <MessageSquare size={13} />
-                                </div>
-                                <span
-                                    className={`text-[13px] font-medium truncate ${isActive
-                                        ? "text-slate-100"
-                                        : "text-slate-400"
-                                        }`}
-                                >
-                                    {conv?.title || "New Chat"}
-                                </span>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                <div className="mx-2.5 h-px bg-white/[0.06]" />
-
-                <div className="px-3.5 py-3.5">
-                    {userData ? (
-                        <div className="flex items-center gap-2.5 cursor-pointer rounded-xl px-3 py-2.5 hover:bg-white/[0.05] transition-colors duration-150">
-                            {/* Image */}
-                            <div className="relative shrink-0">
-                                {(userData?.avatar && !imageError) ? (
-                                    <img
-                                        src={userData.avatar}
-                                        alt={userData.name || "User"}
-                                        referrerPolicy="no-referrer"
-                                        onError={() => setImageError(true)}
-                                        className="w-9 h-9 rounded-[10px] object-cover border-2 border-indigo-500/25"
-                                    />
-                                ) : (
-                                    <div className="w-9 h-9 rounded-[10px] bg-white/[0.06] flex items-center justify-center">
-                                        <User size={15} className="text-slate-400" />
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-[13.5px] font-semibold text-slate-100 truncate">
-                                    {userData?.name || "User"}
-                                </p>
-                                <p className="text-[11px] text-slate-600 mt-px">
-                                    {userData?.plan || "Free"}
-                                </p>
-                            </div>
-                            <div className="flex gap-1">
-                                <button
-                                    className="flex items-center justify-center w-7 h-7 rounded-[7px] border-none bg-transparent text-yellow-600 cursor-pointer hover:bg-white/[0.08] hover:text-slate-400 transition-all duration-150"
-                                >
-                                    <Coins size={16} />
-                                </button>
-                                <button
-                                    className="flex items-center justify-center w-7 h-7 rounded-[7px] border-none bg-transparent text-yellow-600 cursor-pointer hover:bg-white/[0.08] hover:text-slate-400 transition-all duration-150"
-                                    onClick={handleLogOut}
-                                >
-                                    <LogOut size={20} />
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <button>
-                            Login
-                        </button>
-                    )}
-                </div>
-            </div>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCreateConversation}
+                disabled={isCreating}
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 text-[13px] font-medium text-white bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 rounded-xl shadow-xs shadow-indigo-950/60 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500/50 disabled:opacity-50"
+              >
+                {isCreating ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <Plus size={15} />
+                )}
+                <span>New Chat</span>
+              </button>
+            )}
+          </div>
         </div>
-    );
+
+        {/* Navigation Section */}
+        <div className="flex-1 overflow-y-auto px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-h-0">
+          {!isCollapsed && (
+            <div className="px-2 pt-2 pb-1.5 text-[11px] font-medium text-slate-500">
+              Recent chats
+            </div>
+          )}
+
+          <nav
+            className="flex flex-col gap-0.5"
+            aria-label="Recent conversations"
+          >
+            {safeConversations.length === 0
+              ? !isCollapsed && (
+                  <div className="px-3 py-6 text-center flex flex-col items-center justify-center gap-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-slate-500">
+                      <MessageSquare size={14} />
+                    </div>
+                    <p className="text-[12px] font-medium text-slate-400">
+                      No chats yet
+                    </p>
+                    <p className="text-[11px] text-slate-500 max-w-[170px]">
+                      Start a new conversation to build or query agents.
+                    </p>
+                  </div>
+                )
+              : safeConversations.map((conv) => {
+                  const isActive = selectedConversation?._id === conv?._id;
+                  const title = conv?.title?.trim() || "New Chat";
+
+                  if (isCollapsed) {
+                    return (
+                      <button
+                        key={conv._id}
+                        type="button"
+                        onClick={() => handleSelectConversation(conv)}
+                        title={title}
+                        aria-label={title}
+                        aria-current={isActive ? "page" : undefined}
+                        className={`w-10 h-10 mx-auto flex items-center justify-center rounded-xl transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500/50
+                                                ${
+                                                  isActive
+                                                    ? "bg-indigo-500/15 text-indigo-300 border border-indigo-500/25"
+                                                    : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
+                                                }`}
+                      >
+                        <MessageSquare size={16} />
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={conv._id}
+                      type="button"
+                      onClick={() => handleSelectConversation(conv)}
+                      title={title}
+                      aria-current={isActive ? "page" : undefined}
+                      className={`group w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left transition-all duration-150 cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500/50
+                                            ${
+                                              isActive
+                                                ? "bg-indigo-500/10 border-indigo-500/20 text-slate-100"
+                                                : "bg-transparent border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
+                                            }`}
+                    >
+                      <div
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors
+                                                ${
+                                                  isActive
+                                                    ? "bg-indigo-500/20 text-indigo-300"
+                                                    : "bg-white/[0.04] text-slate-500 group-hover:text-slate-300"
+                                                }`}
+                      >
+                        <MessageSquare size={13} />
+                      </div>
+                      <span className="text-[13px] font-medium truncate flex-1">
+                        {title}
+                      </span>
+                    </button>
+                  );
+                })}
+          </nav>
+        </div>
+
+        {/* Footer Section */}
+        <div className="shrink-0 border-t border-white/[0.06] p-2.5">
+          {userData ? (
+            isCollapsed ? (
+              <div className="flex flex-col items-center gap-2 py-1">
+                <div
+                  title={`${userData.name || "User"} (${userData.plan || "Free"})`}
+                  className="relative"
+                >
+                  {showAvatar ? (
+                    <img
+                      src={userData.avatar}
+                      alt={userData.name || "User"}
+                      referrerPolicy="no-referrer"
+                      onError={() => setFailedAvatarUrl(userData.avatar)}
+                      className="w-9 h-9 rounded-xl object-cover ring-1 ring-white/10"
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center text-slate-400">
+                      <User size={16} />
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleLogOut}
+                  title="Log out"
+                  aria-label="Log out"
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-rose-500/40"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-colors">
+                <div className="relative shrink-0">
+                  {showAvatar ? (
+                    <img
+                      src={userData.avatar}
+                      alt={userData.name || "User"}
+                      referrerPolicy="no-referrer"
+                      onError={() => setFailedAvatarUrl(userData.avatar)}
+                      className="w-8 h-8 rounded-lg object-cover ring-1 ring-white/10"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center text-slate-400">
+                      <User size={15} />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-medium text-slate-200 truncate leading-tight">
+                    {userData?.name || "User"}
+                  </p>
+                  <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                    {userData?.email || userData?.plan || "Free"}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-0.5 shrink-0">
+                  <div
+                    title="Agent compute credits"
+                    className="flex items-center gap-1 px-1.5 py-1 rounded-md text-amber-400/90 hover:bg-amber-400/10 transition-colors text-[11px] font-mono cursor-default"
+                  >
+                    <Coins size={13} />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleLogOut}
+                    title="Log out"
+                    aria-label="Log out"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-rose-500/40"
+                  >
+                    <LogOut size={15} />
+                  </button>
+                </div>
+              </div>
+            )
+          ) : isCollapsed ? (
+            <div className="flex justify-center py-1">
+              <Link
+                to="/login"
+                title="Sign in"
+                aria-label="Sign in"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-100 hover:bg-white/[0.05] transition-colors"
+              >
+                <User size={16} />
+              </Link>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 text-xs font-medium border border-white/[0.07] transition-colors"
+            >
+              Sign in
+            </Link>
+          )}
+        </div>
+      </aside>
+    </>
+  );
 }
