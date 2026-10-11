@@ -13,15 +13,37 @@ export async function login(req, res) {
     const { token } = req.body;
 
     const decoded = await getAuth(app).verifyIdToken(token);
-    let user = await findOneUser(decoded.uid);
+    let user = await findOneUser(decoded.uid, decoded.email);
 
     if (!user) {
-      user = await createUser(decoded);
+      user = await createUser({
+        firebaseUid: decoded.uid,
+        name: decoded.name,
+        email: decoded.email,
+        avatar: decoded.picture,
+      });
+    } else {
+      let updated = false;
+      if (!user.firebaseUid && decoded.uid) {
+        user.firebaseUid = decoded.uid;
+        updated = true;
+      }
+      if (decoded.picture && user.avatar !== decoded.picture) {
+        user.avatar = decoded.picture;
+        updated = true;
+      }
+      if (updated) {
+        await user.save();
+      }
     }
 
     const sessionId = crypto.randomUUID();
 
-    await setSession(user._id, sessionId, decoded);
+    await setSession(user._id, sessionId, {
+      name: user.name || decoded.name,
+      email: user.email || decoded.email,
+      avatar: user.avatar || decoded.picture,
+    });
 
     res.cookie("session", sessionId, {
       ...COOKIE_OPTIONS,
