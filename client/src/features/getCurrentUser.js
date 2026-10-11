@@ -1,4 +1,4 @@
-import { api } from "../../utils/axios.js";
+import { api } from "../utils/axios.js";
 
 export default async function getCurrentUser() {
   try {
