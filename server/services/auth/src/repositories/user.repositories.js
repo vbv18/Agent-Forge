@@ -1,9 +1,8 @@
 import UserModel from "../models/user.model.js";
 
-export async function findOneUser(firebaseUid) {
-  const user = await UserModel.findOne({
-    firebaseUid,
-  });
+export async function findOneUser(firebaseUid, email) {
+  const query = email ? { $or: [{ firebaseUid }, { email }] } : { firebaseUid };
+  const user = await UserModel.findOne(query);
 
   return user;
 }
