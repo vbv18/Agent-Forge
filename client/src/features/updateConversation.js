@@ -5,7 +5,7 @@ export default async function updateConversation() {
     const response = await api.post("/chat/conversations/update");
     return response.data.conversation;
   } catch (error) {
-    console.error("[Create-Conversation Error]", error);
+    console.error("[Update-Conversation Error]", error);
     return null;
   }
 }
