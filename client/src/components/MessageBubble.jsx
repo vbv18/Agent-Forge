@@ -1,33 +1,20 @@
-import { Bot, User } from "lucide-react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function MessageBubble({ role, content }) {
   const isUser = role === "user";
 
   return (
-    <div
-      className={`flex items-start gap-3 w-full ${
-        isUser ? "flex-row-reverse" : "flex-row"
-      }`}
-    >
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 text-xs ${
-          isUser
-            ? "bg-white/[0.08] text-slate-300 border border-white/[0.1]"
-            : "bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 shadow-xs shadow-indigo-500/20"
-        }`}
-        aria-label={isUser ? "User message" : "AgentForge response"}
+        className={`max-w-[72%] px-4 py-2.5 rounded-2xl text-[13.5px] leading-relaxed break-words
+          ${
+            isUser
+              ? "bg-linear-to-br from-indigo-500 to-violet-700 text-white rounded-tr-sm"
+              : "bg-white/[0.04] border border-white/[0.07] text-slate-200 rounded-tl-sm [&_pre]:bg-black/30 [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_code]:font-mono [&_table]:border-collapse [&_th]:border [&_th]:border-white/10 [&_th]:p-2 [&_td]:border [&_td]:border-white/10 [&_td]:p-2"
+          }`}
       >
-        {isUser ? <User size={14} /> : <Bot size={14} />}
-      </div>
-
-      <div
-        className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-3 text-[14px] leading-relaxed transition-colors ${
-          isUser
-            ? "bg-indigo-600/20 text-slate-100 border border-indigo-500/30 rounded-tr-xs"
-            : "bg-white/[0.03] text-slate-200 border border-white/[0.07] rounded-tl-xs"
-        }`}
-      >
-        <div className="whitespace-pre-wrap break-words">{content}</div>
+        <Markdown remarkPlugins={[remarkGfm]}>{content || ""}</Markdown>
       </div>
     </div>
   );

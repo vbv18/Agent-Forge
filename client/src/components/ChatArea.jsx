@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ChatInput from "./ChatInput.jsx";
 import MessageList from "./MessageList.jsx";
 import Nav from "./Nav.jsx";
@@ -8,6 +8,7 @@ import { setMessages } from "../redux/messageSlice.js";
 
 export default function ChatArea() {
   const { selectedConversation } = useSelector((state) => state.conversation);
+  const [selectedPrompt, setSelectedPrompt] = useState("");
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -29,13 +30,16 @@ export default function ChatArea() {
     return () => {
       isCurrent = false;
     };
-  }, [dispatch, selectedConversation]);
+  }, [dispatch, selectedConversation?._id]);
 
   return (
     <main className="flex-1 flex flex-col h-full min-h-0 min-w-0 overflow-hidden bg-[#0d0f14]">
       <Nav />
-      <MessageList />
-      <ChatInput />
+      <MessageList onSelectPrompt={(p) => setSelectedPrompt(p)} />
+      <ChatInput
+        initialPrompt={selectedPrompt}
+        onResetPrompt={() => setSelectedPrompt("")}
+      />
     </main>
   );
 }

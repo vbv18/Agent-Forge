@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { dummyPrompts } from "../lib/data.js";
 import MessageBubble from "./MessageBubble.jsx";
 
-export default function MessageList() {
+export default function MessageList({ onSelectPrompt }) {
   const { selectedConversation } = useSelector((state) => state.conversation);
   const { messages } = useSelector((state) => state.message);
   const messagesEndRef = useRef(null);
@@ -41,7 +41,8 @@ export default function MessageList() {
               <button
                 key={index}
                 type="button"
-                className="text-[12px] font-medium text-slate-300 bg-white/[0.04] border border-white/[0.08] hover:border-indigo-500/30 hover:bg-white/[0.07] px-3.5 py-2 rounded-xl transition-all duration-150 cursor-pointer shadow-xs"
+                onClick={() => onSelectPrompt?.(prompt)}
+                className="text-[12px] font-medium text-slate-300 bg-white/[0.04] border border-white/[0.08] hover:border-indigo-500/30 hover:bg-white/[0.07] px-3.5 py-2 rounded-xl transition-all duration-150 cursor-pointer shadow-xs active:scale-95"
               >
                 {prompt}
               </button>

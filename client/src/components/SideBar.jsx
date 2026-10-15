@@ -1,4 +1,5 @@
 import {
+  Check,
   Coins,
   Loader2,
   LogOut,
@@ -6,7 +7,9 @@ import {
   PanelLeft,
   PanelLeftClose,
   PanelLeftOpen,
+  Pencil,
   Plus,
+  Trash2,
   User,
   X,
 } from "lucide-react";
@@ -15,11 +18,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import getConversations from "../features/getConversations.js";
 import createConversation from "../features/createConversation.js";
+import editConversation from "../features/editConversation.js";
+import deleteConversation from "../features/deleteConversation.js";
 import logout from "../features/logout.js";
 import {
   addConversation,
+  deleteConversation as deleteConversationAction,
   setConversations,
   setSelectedConversation,
+  setConversationTitle,
 } from "../redux/conversationSlice.js";
 import { setUserData } from "../redux/userSlice.js";
 
@@ -28,6 +35,10 @@ export default function SideBar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
+  const [editingConvId, setEditingConvId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [deletingConvId, setDeletingConvId] = useState(null);
 
   const dispatch = useDispatch();
   const { conversations, selectedConversation } = useSelector(
@@ -80,6 +91,69 @@ export default function SideBar() {
     if (!conv) return;
     dispatch(setSelectedConversation(conv));
     setIsMobileOpen(false);
+  }
+
+  function handleStartEdit(conv, e) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    setEditingConvId(conv._id);
+    setEditingTitle(conv?.title?.trim() || "New Chat");
+  }
+
+  function handleCancelEdit(e) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    setEditingConvId(null);
+    setEditingTitle("");
+  }
+
+  async function handleSaveEdit(convId, e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const trimmed = editingTitle.trim();
+    if (!trimmed) {
+      return;
+    }
+    setIsSavingEdit(true);
+    try {
+      const updated = await editConversation(convId, trimmed);
+      if (updated && updated._id) {
+        dispatch(setConversationTitle(updated));
+      } else {
+        dispatch(setConversationTitle({ _id: convId, title: trimmed }));
+      }
+      setEditingConvId(null);
+      setEditingTitle("");
+    } catch (error) {
+      console.error("[Edit-Conversation-Error]", error);
+    } finally {
+      setIsSavingEdit(false);
+    }
+  }
+
+  async function handleDeleteConversation(convId, e) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    if (deletingConvId) return;
+    setDeletingConvId(convId);
+    try {
+      const res = await deleteConversation(convId);
+      if (res) {
+        dispatch(deleteConversationAction(convId));
+      }
+    } catch (error) {
+      console.error("[Delete-Conversation-Error]", error);
+    } finally {
+      setDeletingConvId(null);
+    }
   }
 
   async function handleLogOut() {
@@ -266,34 +340,121 @@ export default function SideBar() {
                     );
                   }
 
+                  const isEditing = editingConvId === conv._id;
+                  const isDeleting = deletingConvId === conv._id;
+
                   return (
-                    <button
+                    <div
                       key={conv._id}
-                      type="button"
-                      onClick={() => handleSelectConversation(conv)}
-                      title={title}
-                      aria-current={isActive ? "page" : undefined}
-                      className={`group w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left transition-all duration-150 cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500/50
-                                            ${
-                                              isActive
-                                                ? "bg-indigo-500/10 border-indigo-500/20 text-slate-100"
-                                                : "bg-transparent border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
-                                            }`}
+                      className={`group relative flex items-center justify-between w-full rounded-xl transition-all duration-150 border ${
+                        isActive
+                          ? "bg-indigo-500/10 border-indigo-500/20 text-slate-100"
+                          : "bg-transparent border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
+                      }`}
                     >
-                      <div
-                        className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors
-                                                ${
-                                                  isActive
-                                                    ? "bg-indigo-500/20 text-indigo-300"
-                                                    : "bg-white/[0.04] text-slate-500 group-hover:text-slate-300"
-                                                }`}
-                      >
-                        <MessageSquare size={13} />
-                      </div>
-                      <span className="text-[13px] font-medium truncate flex-1">
-                        {title}
-                      </span>
-                    </button>
+                      {isEditing ? (
+                        <form
+                          onSubmit={(e) => handleSaveEdit(conv._id, e)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1.5 w-full p-1.5 min-w-0"
+                        >
+                          <div className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center shrink-0">
+                            <MessageSquare size={13} />
+                          </div>
+                          <input
+                            type="text"
+                            value={editingTitle}
+                            onChange={(e) => setEditingTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Escape") {
+                                handleCancelEdit(e);
+                              }
+                            }}
+                            disabled={isSavingEdit}
+                            autoFocus
+                            className="flex-1 min-w-0 bg-[#12141c] text-[13px] text-slate-100 px-2 py-1 rounded-lg border border-indigo-500/40 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                          />
+                          <button
+                            type="submit"
+                            disabled={isSavingEdit || !editingTitle.trim()}
+                            title="Save title"
+                            aria-label="Save title"
+                            className="p-1 rounded-lg text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-colors disabled:opacity-40 cursor-pointer"
+                          >
+                            {isSavingEdit ? (
+                              <Loader2 size={13} className="animate-spin" />
+                            ) : (
+                              <Check size={13} />
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            disabled={isSavingEdit}
+                            title="Cancel"
+                            aria-label="Cancel"
+                            className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/[0.06] transition-colors cursor-pointer"
+                          >
+                            <X size={13} />
+                          </button>
+                        </form>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectConversation(conv)}
+                            title={title}
+                            aria-current={isActive ? "page" : undefined}
+                            className="flex items-center gap-2.5 min-w-0 flex-1 px-2.5 py-2 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500/50 rounded-l-xl"
+                          >
+                            <div
+                              className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                                isActive
+                                  ? "bg-indigo-500/20 text-indigo-300"
+                                  : "bg-white/[0.04] text-slate-500 group-hover:text-slate-300"
+                              }`}
+                            >
+                              <MessageSquare size={13} />
+                            </div>
+                            <span className="text-[13px] font-medium truncate flex-1">
+                              {title}
+                            </span>
+                          </button>
+
+                          <div className="flex items-center gap-0.5 pr-1.5 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={(e) => handleStartEdit(conv, e)}
+                              title="Edit title"
+                              aria-label="Edit title"
+                              className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-300 hover:bg-indigo-500/15 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500/50"
+                            >
+                              <Pencil size={13} />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={(e) =>
+                                handleDeleteConversation(conv._id, e)
+                              }
+                              disabled={isDeleting}
+                              title="Delete conversation"
+                              aria-label="Delete conversation"
+                              className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/15 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-rose-500/50 disabled:opacity-40"
+                            >
+                              {isDeleting ? (
+                                <Loader2
+                                  size={13}
+                                  className="animate-spin text-rose-400"
+                                />
+                              ) : (
+                                <Trash2 size={13} />
+                              )}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   );
                 })}
           </nav>
