@@ -7,7 +7,7 @@ const app = express();
 
 app.use(express.json());
 
-app.use("/agents", agentRouter);
+app.use("/", agentRouter);
 
 const port = process.env.PORT;
 

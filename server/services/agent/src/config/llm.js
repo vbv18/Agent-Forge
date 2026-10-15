@@ -2,15 +2,14 @@ import { ChatGroq } from "@langchain/groq";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
 const groq = new ChatGroq({
-  model: "openai/gpt-oss-120b",
-  temperature: 0.4,
-  reasoningEffort: "medium",
+  model: "llama-3.3-70b-versatile",
+  temperature: 0.5,
 });
 
 const gemini = new ChatGoogleGenerativeAI({
   model: "gemini-3.1-flash",
-  temperature: 0.4,
-  reasoningEffort: "medium",
+  temperature: 0.2,
+  apiKey: process.env.GOOGLE_API_KEY,
 });
 
 export default function getModel(agent) {
