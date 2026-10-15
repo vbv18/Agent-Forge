@@ -1,8 +1,15 @@
 import * as messageRepository from "../repositories/message.repositories.js";
+import { getConversationById } from "../repositories/conversation.repositories.js";
 
 export async function saveMessage(req, res) {
   try {
     const { conversationId, role, content } = req.body;
+
+    if (!conversationId || !role || content === undefined || content === null) {
+      return res.status(400).json({
+        message: "conversationId, role, and content are required",
+      });
+    }
 
     await messageRepository.saveMessage(conversationId, role, content);
 
@@ -21,11 +28,27 @@ export async function saveMessage(req, res) {
 export async function getMessages(req, res) {
   try {
     const { conversationId } = req.params;
+    const userId = req.headers["x-user-id"];
+
+    if (!conversationId) {
+      return res.status(400).json({
+        message: "conversationId is required",
+      });
+    }
+
+    if (userId) {
+      const conv = await getConversationById(conversationId, userId);
+      if (!conv) {
+        return res.status(404).json({
+          message: "Conversation not found or unauthorized",
+        });
+      }
+    }
 
     const messages = await messageRepository.getMessages(conversationId);
 
     return res.status(200).json({
-      message: "Messages fetched Succesfully",
+      message: "Messages fetched successfully",
       messages,
     });
   } catch (error) {

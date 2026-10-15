@@ -5,6 +5,7 @@ const messageSchema = new mongoose.Schema(
     conversationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "conversations",
+      index: true,
     },
     role: {
       type: String,

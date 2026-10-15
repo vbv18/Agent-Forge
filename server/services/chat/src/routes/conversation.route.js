@@ -7,6 +7,14 @@ conversationRouter.get("/", conversationController.getConversations);
 
 conversationRouter.post("/", conversationController.createConversation);
 
-conversationRouter.post("/update", conversationController.updateConversation);
+conversationRouter.patch(
+  "/:conversationId",
+  conversationController.editConversation,
+);
+
+conversationRouter.delete(
+  "/:conversationId",
+  conversationController.deleteConversation,
+);
 
 export default conversationRouter;

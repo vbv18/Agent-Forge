@@ -37,21 +37,77 @@ export async function getConversations(req, res) {
   }
 }
 
-export async function updateConversation(req, res) {
+export async function editConversation(req, res) {
   try {
-    const { conversationId, newTitle } = req.body;
+    const { conversationId } = req.params;
+    const userId = req.headers["x-user-id"];
+    const title = req.body?.newTitle;
+
+    if (!conversationId) {
+      return res.status(400).json({
+        message: "Conversation ID is required in URL parameters",
+      });
+    }
+
+    if (title === undefined || title === null || String(title).trim() === "") {
+      return res.status(400).json({
+        message: "Title is required",
+      });
+    }
 
     const conversation = await conversationRepository.updateConversationById(
       conversationId,
-      newTitle,
+      userId,
+      String(title).trim(),
     );
 
+    if (!conversation) {
+      return res.status(404).json({
+        message: "Conversation not found or unauthorized",
+      });
+    }
+
     return res.status(200).json({
-      message: "Update Successfuly",
+      message: "Conversation updated successfully",
       conversation,
     });
   } catch (error) {
-    console.error("[Update-Conversations-Error]", error);
+    console.error("[Edit-Conversation-Error]", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function deleteConversation(req, res) {
+  try {
+    const { conversationId } = req.params;
+    const userId = req.headers["x-user-id"];
+
+    if (!conversationId) {
+      return res.status(400).json({
+        message: "Conversation ID is required in URL parameters",
+      });
+    }
+
+    const conversation = await conversationRepository.deleteConversationById(
+      conversationId,
+      userId,
+    );
+
+    if (!conversation) {
+      return res.status(404).json({
+        message: "Conversation not found or unauthorized",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Conversation deleted successfully",
+      conversationId,
+    });
+  } catch (error) {
+    console.error("[Delete-Conversation-Error]", error);
 
     return res.status(500).json({
       message: "Internal server error",
