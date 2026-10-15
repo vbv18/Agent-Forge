@@ -5,16 +5,16 @@ export default async function authMiddleware(req, res, next) {
     const sessionId = req.cookies?.session;
 
     if (!sessionId) {
-      return res.status(400).json({
-        message: "Session not found!",
+      return res.status(401).json({
+        message: "Authentication required: Session not found",
       });
     }
 
     const session = await getSession(sessionId);
 
     if (!session) {
-      return res.status(400).json({
-        message: "Session Expired",
+      return res.status(401).json({
+        message: "Authentication expired: Please log in again",
       });
     }
 
@@ -22,8 +22,9 @@ export default async function authMiddleware(req, res, next) {
 
     next();
   } catch (error) {
+    console.error("[Auth-Middleware Error]", error);
     return res.status(500).json({
-      message: "[Auth-Middleware Error] " + error,
+      message: "Internal server error",
     });
   }
 }
