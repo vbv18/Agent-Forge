@@ -6,7 +6,11 @@
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint .",
-    "dev": "concurrently \"npm run dev:auth\" \"npm run dev:chat\""
+    "dev:gateway": "npm --prefix gateway run dev",
+    "dev:auth": "npm --prefix services/auth run dev",
+    "dev:chat": "npm --prefix services/chat run dev",
+    "dev:agent": "npm --prefix services/agent run dev",
+    "dev": "concurrently -n \"gateway,auth,chat,agent\" -c \"blue,green,yellow,magenta\" \"npm run dev:gateway\" \"npm run dev:auth\" \"npm run dev:chat\" \"npm run dev:agent\""
   },
   "keywords": [],
   "author": "",
@@ -17,6 +21,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "concurrently": "^9.1.2",
     "eslint": "^10.11.0",
     "globals": "^17.13.0",
     "prettier": "^3.9.9"
