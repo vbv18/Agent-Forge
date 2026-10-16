@@ -37,7 +37,7 @@ export async function updateConversationById(id, userId, title) {
     {
       title,
     },
-    { new: true },
+    { returnDocument: "after" },
   );
 
   return conversation;

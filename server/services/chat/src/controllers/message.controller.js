@@ -3,7 +3,7 @@ import { getConversationById } from "../repositories/conversation.repositories.j
 
 export async function saveMessage(req, res) {
   try {
-    const { conversationId, role, content } = req.body;
+    const { conversationId, role, content, images } = req.body;
 
     if (!conversationId || !role || content === undefined || content === null) {
       return res.status(400).json({
@@ -11,7 +11,7 @@ export async function saveMessage(req, res) {
       });
     }
 
-    await messageRepository.saveMessage(conversationId, role, content);
+    await messageRepository.saveMessage(conversationId, role, content, images);
 
     return res.status(201).json({
       message: "Message saved successfully",
