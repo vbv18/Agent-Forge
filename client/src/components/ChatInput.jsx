@@ -1,4 +1,17 @@
-import { Mic, Paperclip, Send, LoaderCircle, AlertCircle } from "lucide-react";
+import {
+  Mic,
+  Paperclip,
+  Send,
+  LoaderCircle,
+  AlertCircle,
+  Code2,
+  MessageSquare,
+  Zap,
+  FileText,
+  Presentation,
+  ImageIcon,
+  Search,
+} from "lucide-react";
 import { useState } from "react";
 import sendMessage from "../features/sendMessage.js";
 import createConversation from "../features/createConversation.js";
@@ -18,6 +31,7 @@ export default function ChatInput({ initialPrompt, onResetPrompt }) {
   const [prevInitialPrompt, setPrevInitialPrompt] = useState(initialPrompt);
   const dispatch = useDispatch();
   const { selectedConversation } = useSelector((state) => state.conversation);
+  const [selectedAgent, setSelectedAgent] = useState("auto");
 
   if (initialPrompt && initialPrompt !== prevInitialPrompt) {
     setPrevInitialPrompt(initialPrompt);
@@ -70,15 +84,17 @@ export default function ChatInput({ initialPrompt, onResetPrompt }) {
       const payload = {
         prompt,
         conversationId: currentConv?._id,
+        agent: selectedAgent.toLowerCase().trim(),
       };
 
-      const aiResponse = await sendMessage(payload);
+      const data = await sendMessage(payload);
 
-      if (aiResponse) {
+      if (data) {
         dispatch(
           addMessage({
             role: "assistant",
-            content: aiResponse,
+            content: data.answer,
+            images: data.images,
           }),
         );
       }
@@ -93,6 +109,44 @@ export default function ChatInput({ initialPrompt, onResetPrompt }) {
       setIsLoading(false);
     }
   }
+
+  const agents = [
+    {
+      id: "auto",
+      icon: Zap,
+      label: "Auto",
+    },
+    {
+      id: "chat",
+      icon: MessageSquare,
+      label: "Chat",
+    },
+    {
+      id: "coding",
+      icon: Code2,
+      label: "Coding",
+    },
+    {
+      id: "image",
+      icon: ImageIcon,
+      label: "Image",
+    },
+    {
+      id: "pdf",
+      icon: FileText,
+      label: "PDF",
+    },
+    {
+      id: "ppt",
+      icon: Presentation,
+      label: "PPT",
+    },
+    {
+      id: "search",
+      icon: Search,
+      label: "Search",
+    },
+  ];
 
   return (
     <div className="w-full overflow-hidden px-3 md:px-6 py-4 border-t border-white/[0.06] bg-[#0d0f14] shrink-0">
@@ -111,7 +165,39 @@ export default function ChatInput({ initialPrompt, onResetPrompt }) {
           </button>
         </div>
       )}
+
       <div className="max-w-4xl mx-auto flex flex-col gap-2 bg-white/[0.03] border border-white/[0.07] focus-within:border-white/[0.14] focus-within:bg-white/[0.04] rounded-2xl px-4 pt-3.5 pb-3 transition-colors">
+        <div className="flex w-full gap-2 pr-2 flex-wrap">
+          {agents.map((agent) => {
+            const isActive = selectedAgent === agent.id;
+            const Icon = agent.icon;
+
+            return (
+              <div
+                key={agent.id}
+                className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border transition-all cursor-pointer
+                ${
+                  isActive
+                    ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white border-transparent shadow-[0_1px_8px_rgba(99, 102, 241, .35)]"
+                    : "bg-white/[0.03] text-slate-400 border-white/[0.06] hover:bg-white/[0.07]"
+                }
+              `}
+                onClick={() => setSelectedAgent(agent.id)}
+              >
+                <Icon
+                  size={14}
+                  className={`
+                      isActive
+                      ? "text-white"
+                      :"text-slate-500"
+                    `}
+                />
+                {agent.label}
+              </div>
+            );
+          })}
+        </div>
+
         <textarea
           aria-label="Message prompt"
           placeholder="Ask me anything..."
@@ -125,7 +211,7 @@ export default function ChatInput({ initialPrompt, onResetPrompt }) {
               handleSendMessage();
             }
           }}
-          className="w-full bg-transparent outline-none resize-none text-[14px] text-slate-200 placeholder:text-slate-600 leading-relaxed [scrollbar-width:none] [&::-webkit-scrollbar]:hidden disabled:opacity-50"
+          className="w-full bg-transparent pt-4 outline-none resize-none text-[14px] text-slate-200 placeholder:text-slate-600 leading-relaxed [scrollbar-width:none] [&::-webkit-scrollbar]:hidden disabled:opacity-50"
         />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">

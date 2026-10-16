@@ -50,12 +50,13 @@ export default function MessageList({ onSelectPrompt }) {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-4 max-w-4xl mx-auto w-full">
+        <div className="space-y-5">
           {messages.map((msg, index) => (
             <MessageBubble
               key={msg?._id || `${msg?.role || "msg"}-${index}`}
               role={msg?.role}
               content={msg?.content}
+              images={msg?.images || []}
             />
           ))}
           <div ref={messagesEndRef} aria-hidden="true" />

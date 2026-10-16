@@ -33,7 +33,7 @@ export default function ChatArea() {
   }, [dispatch, selectedConversation?._id]);
 
   return (
-    <main className="flex-1 flex flex-col h-full min-h-0 min-w-0 overflow-hidden bg-[#0d0f14]">
+    <main className="flex-1 min-w-0 flex flex-col h-full min-h-0 min-w-0 overflow-hidden bg-[#0d0f14]">
       <Nav />
       <MessageList onSelectPrompt={(p) => setSelectedPrompt(p)} />
       <ChatInput
