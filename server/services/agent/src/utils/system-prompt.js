@@ -1,12 +1,12 @@
 import * as prompts from "../../../lib/prompts.js";
 
-export default function getSystemPrompt(agent, userPrompt = "") {
+export default function getSystemPrompt(agent, content = "") {
   switch (agent) {
     case "router":
-      return prompts.router + userPrompt;
+      return prompts.router + content;
 
     case "chat":
-      return prompts.chat;
+      return prompts.chat + content;
 
     case "coding":
       return prompts.coding;
@@ -21,7 +21,7 @@ export default function getSystemPrompt(agent, userPrompt = "") {
       return prompts.ppt;
 
     case "search":
-      return prompts.search;
+      return prompts.search + content;
 
     default:
       return "";

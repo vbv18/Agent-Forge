@@ -9,7 +9,12 @@ import {
 
 export async function chatAgent(state) {
   const llm = getModel("chat");
-  const systemPrompt = getSystemPrompt("chat");
+
+  const searchContext = state.searchResults
+    ? getSystemPrompt("search", JSON.stringify(state.searchResults))
+    : "";
+
+  const systemPrompt = getSystemPrompt("chat", searchContext);
   // console.log(systemPrompt);
 
   const history = (await getMemory(state.conversationId)) || [];
@@ -23,17 +28,21 @@ export async function chatAgent(state) {
     }
   });
 
-  const lastMsg = history[history.length - 1];
-  if (!lastMsg || lastMsg.role !== "user" || lastMsg.content !== state.prompt) {
+  const lastMsg = history.at(-1);
+
+  if (lastMsg?.role !== "user" || lastMsg?.content !== state.prompt) {
     messages.push(new HumanMessage(state.prompt));
   }
 
-  // console.log(messages);
-
   const response = await llm.invoke(messages);
+
+  const aiResponse =
+    typeof response.content === "string"
+      ? response.content.trim()
+      : JSON.stringify(response.content);
 
   return {
     ...state,
-    aiResponse: response.content.trim(),
+    aiResponse,
   };
 }

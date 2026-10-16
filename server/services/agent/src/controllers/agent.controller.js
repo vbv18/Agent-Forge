@@ -3,12 +3,14 @@ import graph from "../graph/graph.js";
 import { updateMemoryBatch } from "../config/memory.js";
 
 export async function agent(req, res) {
+  let result;
+
   try {
-    const { prompt, conversationId } = req.body;
+    const { prompt, conversationId, agent } = req.body;
     const userId = req.headers["x-user-id"];
     const chatServiceUrl = process.env.CHAT_SERVICE_URL;
 
-    if (!prompt.trim() || !conversationId.trim()) {
+    if (!prompt.trim() || !conversationId.trim() || !agent.trim()) {
       return res.status(400).json({
         message: "prompt and conversationId are required",
       });
@@ -32,14 +34,17 @@ export async function agent(req, res) {
     );
 
     // 2. Generate the response.
-    const result = await graph.invoke({
+    result = await graph.invoke({
       prompt,
       conversationId,
+      agent,
     });
 
-    const aiResponse = result.aiResponse.trim()
-      ? result.aiResponse.trim()
-      : "I'm sorry, I couldn't generate a response for your request.";
+    const rawResponse =
+      typeof result?.aiResponse === "string" ? result.aiResponse.trim() : "";
+    const aiResponse =
+      rawResponse ||
+      "I'm sorry, I couldn't generate a response for your request.";
 
     // 3. Persist assistant message.
     await axios.post(
@@ -48,6 +53,7 @@ export async function agent(req, res) {
         conversationId,
         role: "assistant",
         content: aiResponse,
+        images: result.images,
       },
       { headers: requestHeaders, timeout: 10000 },
     );
@@ -64,13 +70,18 @@ export async function agent(req, res) {
 
     return res.status(200).json({
       message: "Agent Response",
-      aiResponse,
+      answer: aiResponse,
+      images: result.images,
     });
   } catch (error) {
-    console.error(
-      "[Agent-Error]",
-      error?.response?.data || error?.message || error,
-    );
+    if (error.code === "413") {
+      console.error("[Rate-Limit-Error] - LLM:", result.agent);
+    } else {
+      console.error(
+        "[Agent-Error]",
+        error?.response?.data || error?.message || error,
+      );
+    }
 
     return res.status(500).json({
       message: "Internal Server Error",
