@@ -18,7 +18,8 @@ app.use(
   }),
 );
 
-app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+app.use(morgan("combined"));
+
 app.use(express.json());
 app.use(cookieParser());
 
