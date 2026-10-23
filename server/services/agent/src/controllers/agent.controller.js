@@ -10,9 +10,9 @@ export async function agent(req, res) {
     const userId = req.headers["x-user-id"];
     const chatServiceUrl = process.env.CHAT_SERVICE_URL;
 
-    if (!prompt.trim() || !conversationId.trim() || !agent.trim()) {
+    if (!prompt?.trim() || !conversationId?.trim() || !agent?.trim()) {
       return res.status(400).json({
-        message: "prompt and conversationId are required",
+        message: "prompt, conversationId, and agent are required",
       });
     }
 
@@ -46,6 +46,12 @@ export async function agent(req, res) {
       rawResponse ||
       "I'm sorry, I couldn't generate a response for your request.";
 
+    const artifacts = Array.isArray(result?.artifact)
+      ? result.artifact
+      : result?.artifact
+      ? [result.artifact]
+      : [];
+
     // 3. Persist assistant message.
     await axios.post(
       `${chatServiceUrl}/messages/`,
@@ -53,7 +59,9 @@ export async function agent(req, res) {
         conversationId,
         role: "assistant",
         content: aiResponse,
-        images: result.images,
+        images: result?.images || [],
+        artifacts,
+        artifact: artifacts,
       },
       { headers: requestHeaders, timeout: 10000 },
     );
@@ -71,20 +79,21 @@ export async function agent(req, res) {
     return res.status(200).json({
       message: "Agent Response",
       answer: aiResponse,
-      images: result.images,
+      images: result?.images || [],
+      artifacts,
+      artifact: artifacts,
     });
   } catch (error) {
-    if (error.code === "413") {
-      console.error("[Rate-Limit-Error] - LLM:", result.agent);
-    } else {
-      console.error(
-        "[Agent-Error]",
-        error?.response?.data || error?.message || error,
-      );
-    }
+    const errorDetails = error?.response?.data || error?.message || error;
+    console.error("[Agent-Error]", errorDetails);
+
+    const clientMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Internal Server Error";
 
     return res.status(500).json({
-      message: "Internal Server Error",
+      message: clientMessage,
     });
   }
 }

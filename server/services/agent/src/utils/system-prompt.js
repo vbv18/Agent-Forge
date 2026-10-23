@@ -8,8 +8,8 @@ export default function getSystemPrompt(agent, content = "") {
     case "chat":
       return prompts.chat + content;
 
-    case "coding":
-      return prompts.coding;
+    case "code_generation":
+      return prompts.code_generation + content;
 
     case "image":
       return prompts.image;
@@ -22,6 +22,9 @@ export default function getSystemPrompt(agent, content = "") {
 
     case "search":
       return prompts.search + content;
+
+    case "intent":
+      return prompts.intent + content;
 
     default:
       return "";

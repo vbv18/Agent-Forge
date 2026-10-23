@@ -1,16 +1,25 @@
 import { ChatGroq } from "@langchain/groq";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatOpenRouter } from "@langchain/openrouter";
 
-// for router and chat (fastest, better for routing)
-const groq = new ChatGroq({
+// Groq with gpt-oss-120b: ultra-fast, robust for chat, routing, and high-quality coding artifacts
+export const groq = new ChatGroq({
   model: "openai/gpt-oss-120b",
   temperature: 0.1,
   apiKey: process.env.GROQ_API_KEY,
 });
 
-// for coding & search
-const gemini = new ChatGoogleGenerativeAI({
-  model: "gemini-3.5-flash-lite",
+// OpenRouter deepseek-chat
+export const openrouter = new ChatOpenRouter({
+  model: "deepseek/deepseek-chat",
+  temperature: 0,
+  maxTokens: 4096,
+  apiKey: process.env.OPENROUTER_API_KEY,
+});
+
+// Gemini
+export const gemini = new ChatGoogleGenerativeAI({
+  model: "gemini-2.5-flash",
   temperature: 0.2,
   apiKey: process.env.GOOGLE_API_KEY,
 });
@@ -20,13 +29,11 @@ export default function getModel(agent) {
     case "chat":
       return groq;
     case "coding":
-      return gemini;
-    // case "image": return "image";
-    // case "pdf": return "pdf";
-    // case "ppt": return "ppt";
+      return groq;
     case "search":
-      return gemini;
-
+      return groq;
+    case "intent":
+      return groq;
     default:
       return groq;
   }

@@ -2,8 +2,6 @@ import getSystemPrompt from "../utils/system-prompt.js";
 import getModel from "../config/llm.js";
 
 export async function router(state) {
-  console.log(state.agent);
-
   if (state.agent && state.agent !== "auto") {
     return {
       ...state,
@@ -17,6 +15,8 @@ export async function router(state) {
 
   const response = await llm.invoke(systemPrompt);
   const text = (response?.content || "").toLowerCase().trim();
+
+  console.log("Agents used or to be used: ", state.agent, text);
 
   const validAgents = ["coding", "image", "pdf", "ppt", "search", "chat"];
   const matchedAgent =
