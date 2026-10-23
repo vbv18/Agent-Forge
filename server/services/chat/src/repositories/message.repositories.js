@@ -1,7 +1,13 @@
 import mongoose from "mongoose";
 import MessageModel from "../models/message.model.js";
 
-export async function saveMessage(conversationId, role, content, images) {
+export async function saveMessage(
+  conversationId,
+  role,
+  content,
+  images = [],
+  artifacts = [],
+) {
   if (!conversationId || !mongoose.Types.ObjectId.isValid(conversationId)) {
     throw new Error("A valid conversationId is required to save a message");
   }
@@ -10,7 +16,8 @@ export async function saveMessage(conversationId, role, content, images) {
     conversationId,
     role,
     content,
-    images,
+    images: images || [],
+    artifacts: artifacts || [],
   });
 
   return message;

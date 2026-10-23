@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { artifactSchema } from "./artifact.model.js";
 
 const messageSchema = new mongoose.Schema(
   {
@@ -11,8 +12,11 @@ const messageSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "assistant"],
     },
-    content: String,
+    content: {
+      type: String,
+    },
     images: [String],
+    artifacts: [artifactSchema],
   },
   {
     timestamps: true,
