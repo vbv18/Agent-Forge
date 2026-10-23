@@ -1,5 +1,5 @@
 export const dummyPrompts = [
-  "Write a Netflix Clone.",
-  "Explain Redis.",
-  "How to start with a Next.js project?",
+  "Research Like a Team of Experts",
+  "Debug a Production Incident",
+  "Plan and Execute a Project",
 ];

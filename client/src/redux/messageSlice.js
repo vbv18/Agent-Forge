@@ -4,6 +4,10 @@ const messageSlice = createSlice({
   name: "message",
   initialState: {
     messages: [],
+    artifacts: [],
+    isArtifactOpen: false,
+    activeArtifactIndex: 0,
+    activeFileIndex: 0,
   },
   reducers: {
     setMessages: (state, action) => {
@@ -17,8 +21,43 @@ const messageSlice = createSlice({
         state.messages.push(action.payload);
       }
     },
+    setArtifacts: (state, action) => {
+      const raw = Array.isArray(action.payload)
+        ? action.payload
+        : action.payload
+        ? [action.payload]
+        : [];
+      state.artifacts = raw;
+      if (raw.length > 0) {
+        state.isArtifactOpen = true;
+        state.activeArtifactIndex = 0;
+        state.activeFileIndex = 0;
+      }
+    },
+    toggleArtifactOpen: (state) => {
+      state.isArtifactOpen = !state.isArtifactOpen;
+    },
+    setArtifactOpen: (state, action) => {
+      state.isArtifactOpen = Boolean(action.payload);
+    },
+    setActiveArtifactIndex: (state, action) => {
+      state.activeArtifactIndex = action.payload;
+      state.activeFileIndex = 0;
+    },
+    setActiveFileIndex: (state, action) => {
+      state.activeFileIndex = action.payload;
+    },
   },
 });
 
-export const { setMessages, addMessage } = messageSlice.actions;
+export const {
+  setMessages,
+  addMessage,
+  setArtifacts,
+  toggleArtifactOpen,
+  setArtifactOpen,
+  setActiveArtifactIndex,
+  setActiveFileIndex,
+} = messageSlice.actions;
+
 export default messageSlice.reducer;

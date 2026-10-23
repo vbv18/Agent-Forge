@@ -57,6 +57,7 @@ export default function MessageList({ onSelectPrompt }) {
               role={msg?.role}
               content={msg?.content}
               images={msg?.images || []}
+              artifacts={msg?.artifacts || []}
             />
           ))}
           <div ref={messagesEndRef} aria-hidden="true" />

@@ -4,7 +4,7 @@ import MessageList from "./MessageList.jsx";
 import Nav from "./Nav.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import getMessages from "../features/getMessages.js";
-import { setMessages } from "../redux/messageSlice.js";
+import { setArtifacts, setMessages } from "../redux/messageSlice.js";
 
 export default function ChatArea() {
   const { selectedConversation } = useSelector((state) => state.conversation);
@@ -16,12 +16,17 @@ export default function ChatArea() {
 
     async function fetchMessages() {
       if (selectedConversation?._id) {
-        const messages = await getMessages(selectedConversation._id);
+        const data = await getMessages(selectedConversation._id);
         if (isCurrent) {
-          dispatch(setMessages(messages || []));
+          dispatch(setMessages(data || []));
+
+          const latestArtifactMessage = [...data].reverse().find(msg => msg.artifacts && msg.artifacts.length > 0);
+          dispatch(setArtifacts(latestArtifactMessage?.artifacts || []));
         }
       } else {
         dispatch(setMessages([]));
+        dispatch(setArtifacts([]));
+
       }
     }
 
