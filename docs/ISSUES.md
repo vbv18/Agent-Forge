@@ -124,7 +124,7 @@ import { atomOneDark } from "react-syntax-highlighter/dist/cjs/styles/hljs";
 
 ### C5. Code blocks and artifacts — `MessageBubble.jsx`, `Articraft.jsx`
 - **C5.1** Filename typo: `Articraft.jsx` should be `ArtifactPanel.jsx` (imports in `Home.jsx` lines 3 and 10).
-- **C5.2** Panel is hidden below `xl:` and shows a static placeholder.
+- **C5.2** ~~Panel is hidden below `xl:` and shows a static placeholder.~~ **Resolved:** Removed the desktop vertical trigger rail from `Artifact.jsx`; the Nav.jsx Artifacts button now solely controls panel visibility.
 - **C5.3** Agent-generated artifacts never reach the panel, so it stays empty.
 - **C5.4** Code blocks lack a line-number toggle, show raw uppercase language tags, and `atomOneDark` clashes with the canvas colors.
 
