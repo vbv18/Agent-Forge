@@ -93,10 +93,10 @@ export default function ChatInput({ initialPrompt, onResetPrompt }) {
         const receivedArtifacts = Array.isArray(data?.artifacts)
           ? data.artifacts
           : Array.isArray(data?.artifact)
-          ? data.artifact
-          : data?.artifact
-          ? [data.artifact]
-          : [];
+            ? data.artifact
+            : data?.artifact
+              ? [data.artifact]
+              : [];
 
         dispatch(
           addMessage({
@@ -116,7 +116,7 @@ export default function ChatInput({ initialPrompt, onResetPrompt }) {
       setValue(prompt);
       setErrorMessage(
         error?.response?.data?.message ||
-        "Unable to send message. Please ensure backend services are running.",
+          "Unable to send message. Please ensure backend services are running.",
       );
     } finally {
       setIsLoading(false);
@@ -189,10 +189,11 @@ export default function ChatInput({ initialPrompt, onResetPrompt }) {
               <div
                 key={agent.id}
                 className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border transition-all cursor-pointer
-                ${isActive
+                ${
+                  isActive
                     ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white border-transparent shadow-[0_1px_8px_rgba(99, 102, 241, .35)]"
                     : "bg-white/[0.03] text-slate-400 border-white/[0.06] hover:bg-white/[0.07]"
-                  }
+                }
               `}
                 onClick={() => setSelectedAgent(agent.id)}
               >
@@ -249,10 +250,11 @@ export default function ChatInput({ initialPrompt, onResetPrompt }) {
             aria-label={isLoading ? "Sending message" : "Send message"}
             disabled={!value.trim() || isLoading}
             onClick={handleSendMessage}
-            className={`flex items-center justify-center w-8 h-8 rounded-lg border-none transition-all duration-150 ${value.trim() && !isLoading
-              ? "bg-linear-to-br from-indigo-500 to-violet-700 hover:opacity-90 text-white cursor-pointer"
-              : "bg-white/[0.05] text-slate-600 cursor-not-allowed"
-              }`}
+            className={`flex items-center justify-center w-8 h-8 rounded-lg border-none transition-all duration-150 ${
+              value.trim() && !isLoading
+                ? "bg-linear-to-br from-indigo-500 to-violet-700 hover:opacity-90 text-white cursor-pointer"
+                : "bg-white/[0.05] text-slate-600 cursor-not-allowed"
+            }`}
           >
             {isLoading ? (
               <LoaderCircle size={16} className="animate-spin" />
