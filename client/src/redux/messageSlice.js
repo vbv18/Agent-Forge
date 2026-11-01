@@ -25,8 +25,8 @@ const messageSlice = createSlice({
       const raw = Array.isArray(action.payload)
         ? action.payload
         : action.payload
-        ? [action.payload]
-        : [];
+          ? [action.payload]
+          : [];
       state.artifacts = raw;
       if (raw.length > 0) {
         state.isArtifactOpen = true;

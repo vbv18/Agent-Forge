@@ -8,16 +8,12 @@ import {
   Maximize2,
   Minimize2,
   PanelRightClose,
-  PanelRightOpen,
   FileCode,
   FileText,
   FileJson,
   Layers,
   Sparkles,
-  ChevronDown,
-  ChevronUp,
   FolderTree,
-  Terminal,
 } from "lucide-react";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { atomOneDark } from "react-syntax-highlighter/dist/cjs/styles/hljs";
@@ -66,10 +62,14 @@ function getLanguageFromFilename(filename = "") {
 // Helper to get file icon based on extension
 function getFileIcon(filename = "") {
   const ext = filename.split(".").pop()?.toLowerCase();
-  if (["json"].includes(ext)) return <FileJson size={14} className="text-amber-400" />;
-  if (["md", "txt"].includes(ext)) return <FileText size={14} className="text-slate-400" />;
-  if (["html"].includes(ext)) return <Code2 size={14} className="text-orange-400" />;
-  if (["css", "scss"].includes(ext)) return <Code2 size={14} className="text-sky-400" />;
+  if (["json"].includes(ext))
+    return <FileJson size={14} className="text-amber-400" />;
+  if (["md", "txt"].includes(ext))
+    return <FileText size={14} className="text-slate-400" />;
+  if (["html"].includes(ext))
+    return <Code2 size={14} className="text-orange-400" />;
+  if (["css", "scss"].includes(ext))
+    return <Code2 size={14} className="text-sky-400" />;
   return <FileCode size={14} className="text-indigo-400" />;
 }
 
@@ -112,7 +112,6 @@ export default function Artifact() {
   const [copiedFile, setCopiedFile] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showNotes, setShowNotes] = useState(false);
 
   const artifactList = useMemo(() => {
     return Array.isArray(artifacts) ? artifacts : artifacts ? [artifacts] : [];
@@ -141,7 +140,8 @@ export default function Artifact() {
     if (!files.length) return;
     const combined = files
       .map(
-        (f) => `// ==========================================\n// File: ${f.name}\n// ==========================================\n\n${f.content}\n`,
+        (f) =>
+          `// ==========================================\n// File: ${f.name}\n// ==========================================\n\n${f.content}\n`,
       )
       .join("\n\n");
     await navigator.clipboard.writeText(combined);
@@ -154,39 +154,17 @@ export default function Artifact() {
     downloadSingleFile(currentFile.name, currentFile.content);
   }
 
-  // If panel is completely closed, show a sleek vertical trigger rail on desktop
+  // Panel closed — Nav.jsx Artifacts button handles re-opening
   if (!isArtifactOpen) {
-    return (
-      <div className="hidden lg:flex flex-col items-center justify-between py-4 border-l border-white/[0.06] bg-[#0d0f14] w-12 shrink-0 select-none transition-all duration-200">
-        <button
-          onClick={() => dispatch(setArtifactOpen(true))}
-          title="Open Artifact Studio"
-          className="flex flex-col items-center gap-2 p-2 rounded-xl text-slate-400 hover:text-indigo-400 hover:bg-white/[0.04] transition-all cursor-pointer group"
-        >
-          <PanelRightOpen size={18} />
-          {artifactList.length > 0 && (
-            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-          )}
-        </button>
-
-        <div className="writing-mode-vertical text-[11px] font-medium tracking-wider text-slate-500 uppercase rotate-180">
-          Artifacts {artifactList.length > 0 ? `(${artifactList.length})` : ""}
-        </div>
-
-        <div className="w-6 h-6 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-slate-500">
-          <Code2 size={12} />
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
     <aside
-      className={`h-full border-l border-white/[0.06] flex flex-col overflow-hidden shrink-0 bg-[#0a0c10] transition-all duration-300 z-20 ${
-        isFullscreen
-          ? "fixed inset-0 w-full z-50 bg-[#0a0c10]"
-          : "w-full sm:w-[480px] md:w-[540px] xl:w-[620px]"
-      }`}
+      className={`h-full border-l border-white/[0.06] flex flex-col overflow-hidden shrink-0 bg-[#0a0c10] transition-all duration-300 z-20 ${isFullscreen
+        ? "fixed inset-0 w-full z-50 bg-[#0a0c10]"
+        : "w-full sm:w-[480px] md:w-[540px] xl:w-[620px]"
+        }`}
     >
       {/* Top Header */}
       <div className="h-14 px-4 border-b border-white/[0.06] bg-[#0d0f14] flex items-center justify-between gap-3 shrink-0">
@@ -214,8 +192,11 @@ export default function Artifact() {
 
             {currentArtifact && (
               <span className="text-[11px] text-slate-400 font-mono truncate">
-                {currentArtifact.framework || currentArtifact.language || "Multi-file"}
-                {files.length > 0 && ` • ${files.length} ${files.length === 1 ? "file" : "files"}`}
+                {currentArtifact.framework ||
+                  currentArtifact.language ||
+                  "Multi-file"}
+                {files.length > 0 &&
+                  ` • ${files.length} ${files.length === 1 ? "file" : "files"}`}
               </span>
             )}
           </div>
@@ -284,7 +265,9 @@ export default function Artifact() {
           </h3>
 
           <p className="text-xs text-slate-400 max-w-[320px] leading-relaxed mb-6">
-            When you ask AgentForge to generate code, multi-file applications, or algorithms, your interactive code workspace and files will emerge here.
+            When you ask AgentForge to generate code, multi-file applications,
+            or algorithms, your interactive code workspace and files will emerge
+            here.
           </p>
 
           <div className="w-full max-w-[320px] p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-left">
@@ -312,11 +295,10 @@ export default function Artifact() {
                 <button
                   key={art.id || idx}
                   onClick={() => dispatch(setActiveArtifactIndex(idx))}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium shrink-0 transition-colors cursor-pointer ${
-                    activeArtifactIndex === idx
-                      ? "bg-indigo-600 text-white shadow-sm"
-                      : "bg-white/[0.04] text-slate-400 hover:text-slate-200 hover:bg-white/[0.08]"
-                  }`}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium shrink-0 transition-colors cursor-pointer ${activeArtifactIndex === idx
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "bg-white/[0.04] text-slate-400 hover:text-slate-200 hover:bg-white/[0.08]"
+                    }`}
                 >
                   {art.title || `Artifact ${idx + 1}`}
                 </button>
@@ -336,14 +318,15 @@ export default function Artifact() {
                     key={file.name || idx}
                     onClick={() => dispatch(setActiveFileIndex(idx))}
                     title={file.name}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer border ${
-                      isActive
-                        ? "bg-[#161a23] text-indigo-300 border-indigo-500/30 shadow-sm"
-                        : "bg-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.03] border-transparent"
-                    }`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer border ${isActive
+                      ? "bg-[#161a23] text-indigo-300 border-indigo-500/30 shadow-sm"
+                      : "bg-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.03] border-transparent"
+                      }`}
                   >
                     {getFileIcon(file.name)}
-                    <span className="truncate max-w-[150px]">{fileNameOnly}</span>
+                    <span className="truncate max-w-[150px]">
+                      {fileNameOnly}
+                    </span>
                   </button>
                 );
               })}
@@ -373,7 +356,9 @@ export default function Artifact() {
           {/* Active File Meta Bar */}
           {currentFile && (
             <div className="px-4 py-1.5 bg-[#0e1117] border-b border-white/[0.04] flex items-center justify-between text-[11px] font-mono text-slate-500 shrink-0">
-              <span className="truncate text-slate-400">{currentFile.name}</span>
+              <span className="truncate text-slate-400">
+                {currentFile.name}
+              </span>
               <div className="flex items-center gap-3 shrink-0">
                 <span>{lineCount} lines</span>
                 <span className="uppercase text-[10px] bg-white/[0.04] px-1.5 py-0.5 rounded text-slate-400">
@@ -397,7 +382,8 @@ export default function Artifact() {
                   background: "#0a0d14",
                   fontSize: "12.5px",
                   lineHeight: "1.65",
-                  fontFamily: "JetBrains Mono, ui-monospace, SFMono-Regular, monospace",
+                  fontFamily:
+                    "JetBrains Mono, ui-monospace, SFMono-Regular, monospace",
                   minHeight: "100%",
                 }}
                 lineNumberStyle={{
@@ -414,36 +400,6 @@ export default function Artifact() {
               </div>
             )}
           </div>
-
-          {/* Notes Accordion (if present) */}
-          {currentArtifact?.notes && currentArtifact.notes.length > 0 && (
-            <div className="border-t border-white/[0.06] bg-[#0d0f14] shrink-0">
-              <button
-                onClick={() => setShowNotes(!showNotes)}
-                className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-medium text-slate-300 hover:bg-white/[0.02] transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <Terminal size={14} className="text-amber-400" />
-                  <span>Implementation Notes ({currentArtifact.notes.length})</span>
-                </div>
-                {showNotes ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-              </button>
-
-              {showNotes && (
-                <div className="px-4 pb-3 pt-1 space-y-1.5 max-h-36 overflow-y-auto">
-                  {currentArtifact.notes.map((note, index) => (
-                    <div
-                      key={index}
-                      className="text-[11px] text-slate-400 flex items-start gap-2 leading-relaxed"
-                    >
-                      <span className="text-amber-400 shrink-0">•</span>
-                      <span>{note}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       )}
     </aside>

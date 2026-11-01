@@ -1,11 +1,18 @@
-import { MessageSquare, Code2, PanelRightOpen, PanelRightClose } from "lucide-react";
+import {
+  MessageSquare,
+  Code2,
+  PanelRightOpen,
+  PanelRightClose,
+} from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleArtifactOpen } from "../redux/messageSlice.js";
 
 export default function Nav() {
   const dispatch = useDispatch();
   const { selectedConversation } = useSelector((state) => state.conversation);
-  const { messages, artifacts, isArtifactOpen } = useSelector((state) => state.message);
+  const { messages, artifacts, isArtifactOpen } = useSelector(
+    (state) => state.message,
+  );
 
   const hasArtifacts = Array.isArray(artifacts) && artifacts.length > 0;
 
@@ -40,7 +47,10 @@ export default function Nav() {
               : "bg-white/[0.02] text-slate-400 hover:text-slate-200 border-white/[0.06]"
           }`}
         >
-          <Code2 size={13} className={hasArtifacts ? "text-indigo-400" : "text-slate-400"} />
+          <Code2
+            size={13}
+            className={hasArtifacts ? "text-indigo-400" : "text-slate-400"}
+          />
           <span className="hidden sm:inline">Artifacts</span>
           {hasArtifacts && (
             <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-500/20 text-indigo-300 font-mono">
