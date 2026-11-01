@@ -11,6 +11,9 @@ export default function getSystemPrompt(agent, content = "") {
     case "code_generation":
       return prompts.code_generation + content;
 
+    case "code_review":
+      return prompts.code_review + content;
+
     case "image":
       return prompts.image;
 

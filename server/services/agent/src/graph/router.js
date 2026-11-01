@@ -16,7 +16,7 @@ export async function router(state) {
   const response = await llm.invoke(systemPrompt);
   const text = (response?.content || "").toLowerCase().trim();
 
-  console.log("Agents used or to be used: ", state.agent, text);
+  console.log("Agent used:", text);
 
   const validAgents = ["coding", "image", "pdf", "ppt", "search", "chat"];
   const matchedAgent =

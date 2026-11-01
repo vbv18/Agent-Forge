@@ -28,12 +28,13 @@ export default function getModel(agent) {
   switch (agent) {
     case "chat":
       return groq;
+
     case "coding":
-      return groq;
+      return openrouter;
+
     case "search":
-      return groq;
-    case "intent":
-      return groq;
+      return gemini;
+
     default:
       return groq;
   }

@@ -49,8 +49,8 @@ export async function agent(req, res) {
     const artifacts = Array.isArray(result?.artifact)
       ? result.artifact
       : result?.artifact
-      ? [result.artifact]
-      : [];
+        ? [result.artifact]
+        : [];
 
     // 3. Persist assistant message.
     await axios.post(
