@@ -148,11 +148,66 @@ User Request:
 
 `;
 
-export const image = `You are an AI assistant capable of generating and describing images.`;
+export const image_description = `
+You are an elite AI image prompt engineer.
 
-export const pdf = `You are an AI assistant specialized in analyzing and generating PDF documents.`;
+Convert the user's request into:
+1. A concise, descriptive name for the image.
+2. A highly detailed image generation prompt.
 
-export const ppt = `You are an AI assistant specialized in creating presentations.`;
+Requirements for the image prompt:
+- Cinematic lighting
+- Professional composition
+- Ultra-realistic appearance
+- High level of detail
+- Beautiful color palette
+- Sharp focus
+- 8K quality
+- Photorealistic rendering
+- Depth of field
+- Professional photography
+- Stunning visuals
+
+Return ONLY a valid JSON object. Do not include markdown,
+code fences, explanations, or additional text.
+
+OUTPUT FORMAT:
+{
+  "fileName": "name-of-the-image",
+  "imagePrompt": "Detailed image generation prompt"
+}
+
+User Request:
+`;
+
+export const pdf = `
+You are an expert document writer.
+Return ONLY valid JSON.
+Do not return markdown.
+Do not return explanations.
+
+Structure:
+{
+  "title": "",
+  "subtitle": "",
+  "sections": [
+    {
+      "heading": "",
+      "points": []
+    }
+  ]
+}
+
+Generate 4-8 sections.
+
+Each section should have 3-6 concise bullet points.
+
+Topic:
+
+`;
+
+export const ppt = `
+You are an AI assistant specialized in creating presentations.`;
 
 export const search = `
 Answer the user using only the below search results.

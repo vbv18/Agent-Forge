@@ -14,11 +14,11 @@ export default function getSystemPrompt(agent, content = "") {
     case "code_review":
       return prompts.code_review + content;
 
-    case "image":
-      return prompts.image;
+    case "image_description":
+      return prompts.image_description + content;
 
     case "pdf":
-      return prompts.pdf;
+      return prompts.pdf + content;
 
     case "ppt":
       return prompts.ppt;

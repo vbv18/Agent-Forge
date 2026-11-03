@@ -20,7 +20,7 @@ export const openrouter = new ChatOpenRouter({
 // Gemini
 export const gemini = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash",
-  temperature: 0.2,
+  temperature: 0.4,
   apiKey: process.env.GOOGLE_API_KEY,
 });
 
@@ -34,6 +34,15 @@ export default function getModel(agent) {
 
     case "search":
       return gemini;
+
+    case "image":
+      return groq;
+
+    case "pdf":
+      return groq;
+
+    case "ppt":
+      return groq;
 
     default:
       return groq;
