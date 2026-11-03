@@ -1,11 +1,48 @@
-// Image Agent Implementation Roadmap:
-// 1. Initialize image model (e.g. Gemini Imagen / DALL-E / Stable Diffusion)
-// 2. Extract image prompt and styling instructions from state.prompt
-// 3. Return generated image URL or artifact payload in state.aiResponse
+import axios from "axios";
+import getModel from "../config/llm.js";
+import getSystemPrompt from "../utils/system-prompt.js";
+import { getFromS3, uploadToS3 } from "../utils/s3.utils.js";
+
 export async function imageAgent(state) {
-  return {
-    ...state,
-    aiResponse:
-      "Image generation agent is currently under development. Stay tuned for updates!",
-  };
+  try {
+    const llm = getModel("image");
+
+    const response = await llm.invoke(
+      getSystemPrompt("image_description", state.prompt),
+    );
+    const content = JSON.parse(response.content.trim());
+    // console.log(content);
+    const systemPrompt = content.imagePrompt.trim();
+    const baseName = content.fileName.trim();
+    const fileName = `${baseName}-${Date.now()}.png`;
+
+    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(systemPrompt)}`;
+
+    const imgResponse = await axios.get(imgUrl, {
+      responseType: "arraybuffer",
+    });
+
+    const buffer = Buffer.from(imgResponse.data);
+
+    await uploadToS3(fileName, buffer, "image/png");
+
+    const urlExpiresIn = 24 * 60; // minutes
+    const downloadUrl = await getFromS3(fileName, urlExpiresIn);
+
+    return {
+      ...state,
+      aiResponse: `
+# Image Generated Successfully.
+![Generated Image](${downloadUrl})
+[DownLoad Image](${downloadUrl})
+_Link will expire in 24 hours._
+    `,
+    };
+  } catch (error) {
+    console.warn("[Image-Agent Error]", error);
+    return {
+      ...state,
+      aiResponse: "Failed to generate image!",
+    };
+  }
 }
