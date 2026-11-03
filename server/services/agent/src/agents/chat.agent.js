@@ -8,41 +8,49 @@ import {
 } from "@langchain/core/messages";
 
 export async function chatAgent(state) {
-  const llm = getModel("chat");
+  try {
+    const llm = getModel("chat");
 
-  const searchContext = state.searchResults
-    ? getSystemPrompt("search", JSON.stringify(state.searchResults))
-    : "";
+    const searchContext = state.searchResults
+      ? getSystemPrompt("search", JSON.stringify(state.searchResults))
+      : "";
 
-  const systemPrompt = getSystemPrompt("chat", searchContext);
-  // console.log(systemPrompt);
+    const systemPrompt = getSystemPrompt("chat", searchContext);
+    // console.log(systemPrompt);
 
-  const history = (await getMemory(state.conversationId)) || [];
-  const messages = [new SystemMessage(systemPrompt)];
+    const history = (await getMemory(state.conversationId)) || [];
+    const messages = [new SystemMessage(systemPrompt)];
 
-  history.forEach((msg) => {
-    if (msg.role === "user") {
-      messages.push(new HumanMessage(msg.content));
-    } else {
-      messages.push(new AIMessage(msg.content));
+    history.forEach((msg) => {
+      if (msg.role === "user") {
+        messages.push(new HumanMessage(msg.content));
+      } else {
+        messages.push(new AIMessage(msg.content));
+      }
+    });
+
+    const lastMsg = history.at(-1);
+
+    if (lastMsg?.role !== "user" || lastMsg?.content !== state.prompt) {
+      messages.push(new HumanMessage(state.prompt));
     }
-  });
 
-  const lastMsg = history.at(-1);
+    const response = await llm.invoke(messages);
 
-  if (lastMsg?.role !== "user" || lastMsg?.content !== state.prompt) {
-    messages.push(new HumanMessage(state.prompt));
+    const aiResponse =
+      typeof response.content === "string"
+        ? response.content.trim()
+        : JSON.stringify(response.content);
+
+    return {
+      ...state,
+      aiResponse,
+    };
+  } catch (error) {
+    console.warn("[Chat-Agent Error]", error);
+    return {
+      ...state,
+      aiResponse: "Failed to generate response!",
+    };
   }
-
-  const response = await llm.invoke(messages);
-
-  const aiResponse =
-    typeof response.content === "string"
-      ? response.content.trim()
-      : JSON.stringify(response.content);
-
-  return {
-    ...state,
-    aiResponse,
-  };
 }

@@ -12,13 +12,13 @@ function extractJson(text) {
   const trimmed = text.trim();
   try {
     return JSON.parse(trimmed);
-  } catch { }
+  } catch {}
 
   const match = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
   if (match?.[1]) {
     try {
       return JSON.parse(match[1].trim());
-    } catch { }
+    } catch {}
   }
 
   const firstBrace = trimmed.indexOf("{");
@@ -26,7 +26,7 @@ function extractJson(text) {
   if (firstBrace !== -1 && lastBrace > firstBrace) {
     try {
       return JSON.parse(trimmed.slice(firstBrace, lastBrace + 1));
-    } catch { }
+    } catch {}
   }
   return null;
 }
@@ -61,7 +61,7 @@ export async function codingAgent(state) {
       data = extractJson(response?.content || "");
       console.log(data);
     } catch (error) {
-      console.warn("[CodingAgent] LLM failed", error.message);
+      console.warn("[Code-Generate-Agent Error] LLM failed", error.message);
     }
 
     if (data) {
@@ -113,7 +113,7 @@ export async function codingAgent(state) {
     try {
       response = await llm.invoke(messages);
     } catch (error) {
-      console.warn("[CodingAgent] LLM failed", error.message);
+      console.warn("[Code-Review-Agent Error] LLM failed", error.message);
     }
 
     const aiResponse =
