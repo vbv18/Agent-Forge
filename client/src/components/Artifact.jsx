@@ -161,10 +161,11 @@ export default function Artifact() {
 
   return (
     <aside
-      className={`h-full border-l border-white/[0.06] flex flex-col overflow-hidden shrink-0 bg-[#0a0c10] transition-all duration-300 z-20 ${isFullscreen
-        ? "fixed inset-0 w-full z-50 bg-[#0a0c10]"
-        : "w-full sm:w-[480px] md:w-[540px] xl:w-[620px]"
-        }`}
+      className={`h-full border-l border-white/[0.06] flex flex-col overflow-hidden shrink-0 bg-[#0a0c10] transition-all duration-300 z-20 ${
+        isFullscreen
+          ? "fixed inset-0 w-full z-50 bg-[#0a0c10]"
+          : "w-full sm:w-[480px] md:w-[540px] xl:w-[620px]"
+      }`}
     >
       {/* Top Header */}
       <div className="h-14 px-4 border-b border-white/[0.06] bg-[#0d0f14] flex items-center justify-between gap-3 shrink-0">
@@ -295,10 +296,11 @@ export default function Artifact() {
                 <button
                   key={art.id || idx}
                   onClick={() => dispatch(setActiveArtifactIndex(idx))}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium shrink-0 transition-colors cursor-pointer ${activeArtifactIndex === idx
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "bg-white/[0.04] text-slate-400 hover:text-slate-200 hover:bg-white/[0.08]"
-                    }`}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium shrink-0 transition-colors cursor-pointer ${
+                    activeArtifactIndex === idx
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "bg-white/[0.04] text-slate-400 hover:text-slate-200 hover:bg-white/[0.08]"
+                  }`}
                 >
                   {art.title || `Artifact ${idx + 1}`}
                 </button>
@@ -318,10 +320,11 @@ export default function Artifact() {
                     key={file.name || idx}
                     onClick={() => dispatch(setActiveFileIndex(idx))}
                     title={file.name}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer border ${isActive
-                      ? "bg-[#161a23] text-indigo-300 border-indigo-500/30 shadow-sm"
-                      : "bg-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.03] border-transparent"
-                      }`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer border ${
+                      isActive
+                        ? "bg-[#161a23] text-indigo-300 border-indigo-500/30 shadow-sm"
+                        : "bg-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.03] border-transparent"
+                    }`}
                   >
                     {getFileIcon(file.name)}
                     <span className="truncate max-w-[150px]">

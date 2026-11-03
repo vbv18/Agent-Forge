@@ -159,6 +159,19 @@ export default function MessageBubble({
                 </div>
               );
             },
+            img: ({ src }) => {
+              if (!src) return null;
+
+              return (
+                <img
+                  src={src}
+                  loading="lazy"
+                  onError={(e) => e.currentTarget.remove()}
+                  onClick={() => setLightBox(img)}
+                  className="w-84 h-64 rounded-xl object-cover border border-white/10 cursor-zoom-in hover:opacity-90 transition"
+                />
+              );
+            },
           }}
         >
           {content || ""}
